@@ -1,28 +1,46 @@
 package study.developia.datajpa.entity;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
+// jpa에서 entity에 최소 기본 생성자 하나가 있어야 함(spec에 명시됨)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+// 객체 출력시 출력됨 (연관관계가 있는 team은 하면 안됨)
+@ToString(of = {"id", "username", "age"})
 public class Member {
 
 
     @Id
     @GeneratedValue
+    @Column(name = "member_id")
     private Long id;
 
     private String username;
+    private int age;
 
-    // jpa에서 entity에 최소 기본 생성자 하나가 있어야 함(spec에 명시됨)
-    protected Member() {
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id")
+    private Team team;
+
 
     public Member(String username) {
         this.username = username;
+    }
+
+    public Member(String username, int age, Team team) {
+        this.username = username;
+        this.age = age;
+        if (team != null) {
+            changeTeam(team);
+        }
+    }
+
+    public void changeTeam(Team team) {
+        this.team = team;
+        team.getMember().add(this);
     }
 }
