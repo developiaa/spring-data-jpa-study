@@ -11,6 +11,10 @@ import javax.persistence.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 // 객체 출력시 출력됨 (연관관계가 있는 team은 하면 안됨)
 @ToString(of = {"id", "username", "age"})
+//@NamedQuery(
+//        name = "Member.findByUsername",
+//        query = "select m from Member m where m.username =:username"
+//)
 public class Member {
 
 
