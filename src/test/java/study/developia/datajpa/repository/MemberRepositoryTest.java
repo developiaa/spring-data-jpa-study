@@ -12,6 +12,8 @@ import study.developia.datajpa.entity.Member;
 import study.developia.datajpa.entity.Team;
 
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.print.attribute.standard.PageRanges;
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +29,9 @@ class MemberRepositoryTest {
     MemberRepository memberRepository;
     @Autowired
     TeamRepository teamRepository;
+
+    @PersistenceContext
+    EntityManager em;
 
     @Test
     void testMember() {
@@ -211,5 +216,29 @@ class MemberRepositoryTest {
         assertThat(page.getTotalPages()).isEqualTo(2);
         assertThat(page.isFirst()).isTrue();
         assertThat(page.hasNext()).isTrue();
+    }
+
+    @Test
+    void bulkUpdate(){
+        memberRepository.save(new Member("member1",10));
+        memberRepository.save(new Member("member2",19));
+        memberRepository.save(new Member("member3",20));
+        memberRepository.save(new Member("member4",21));
+        memberRepository.save(new Member("member5",40));
+
+        //벌크연산
+        int resultCount = memberRepository.bulkAgePlus(20);
+
+        //주의해야할 점
+        //벌크 연산시 영속성 컨텍스트를 무시하고 db에 동작되므로 clear해주어야함.
+//        em.flush(); //반영되지 않았던 변경사항 반영
+//        em.clear();
+
+
+        List<Member> result = memberRepository.findByUsername("member5");
+        Member member = result.get(0);
+        assertThat(member.getAge()).isEqualTo(41);
+
+        assertThat(resultCount).isEqualTo(3);
     }
 }
