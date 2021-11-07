@@ -3,12 +3,16 @@ package study.developia.datajpa.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import study.developia.datajpa.dto.MemberDto;
 import study.developia.datajpa.entity.Member;
 import study.developia.datajpa.entity.Team;
 
 
+import javax.print.attribute.standard.PageRanges;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -172,5 +176,40 @@ class MemberRepositoryTest {
         //스프링에러가 발생(하부에서 쓰이는 다른 에러를 변환하여 클라이언트에는 스프링에러만 처리할 수 있도록)
         Optional<Member> aaa = memberRepository.findOptionalByUsername("AAA");
         System.out.println("aaa = " + aaa);
+    }
+
+    @Test
+    void paging(){
+        //given
+        memberRepository.save(new Member("member1",10));
+        memberRepository.save(new Member("member2",10));
+        memberRepository.save(new Member("member3",10));
+        memberRepository.save(new Member("member4",10));
+        memberRepository.save(new Member("member5",10));
+
+        int age = 10;
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
+
+
+        //when
+        Page<Member> page = memberRepository.findByAge(age, pageRequest);
+
+        //api 반환시 dto 변환
+        Page<MemberDto> toMap = page.map(member -> new MemberDto(member.getId(), member.getUsername(), null));
+
+        //then
+        List<Member> content = page.getContent();
+        long totalElements = page.getTotalElements();
+        for (Member member : content) {
+            System.out.println("member = " + member);
+        }
+        System.out.println("totalElements = " + totalElements);
+
+        assertThat(content.size()).isEqualTo(3);
+        assertThat(totalElements).isEqualTo(5);
+        assertThat(page.getNumber()).isEqualTo(0);
+        assertThat(page.getTotalPages()).isEqualTo(2);
+        assertThat(page.isFirst()).isTrue();
+        assertThat(page.hasNext()).isTrue();
     }
 }
