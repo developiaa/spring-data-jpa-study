@@ -11,6 +11,7 @@ import study.developia.datajpa.entity.Team;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -135,7 +136,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    void findByNamed(){
+    void findByNames(){
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("BBB", 20);
 
@@ -146,5 +147,30 @@ class MemberRepositoryTest {
         for (Member member : result) {
             System.out.println("member = " + member);
         }
+    }
+
+    @Test
+    void returnType(){
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("AAA", 20);
+
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+
+        List<Member> result = memberRepository.findListByUsername("sdffsd");
+        System.out.println("result.size() = " + result.size());
+        assertThat(result).isEmpty();
+
+        Optional<Member> optionalResult = memberRepository.findOptionalByUsername("asdfsfdfsd");
+        assertThat(optionalResult).isEqualTo(Optional.empty());
+
+        Member findMember = memberRepository.findMemberByUsername("asfdafsdfds");
+        System.out.println("findMember = " + findMember);
+        assertThat(findMember).isEqualTo(null);
+
+        //Exception
+        //스프링에러가 발생(하부에서 쓰이는 다른 에러를 변환하여 클라이언트에는 스프링에러만 처리할 수 있도록)
+        Optional<Member> aaa = memberRepository.findOptionalByUsername("AAA");
+        System.out.println("aaa = " + aaa);
     }
 }
